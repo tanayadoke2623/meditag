@@ -1,17 +1,82 @@
-# meditag
+# 💊 MediTag
 
-A new Flutter project.
+### Smart Medicine Identification, Verification & Self-Contained QR Labeling System
 
-## Getting Started
+MediTag is a pharmacy-focused digital solution designed to prevent the loss of important medicine information when tablets are removed from their original packaging.
 
-This project is a starting point for a Flutter application.
+When medicines are sold in smaller quantities, the original strip may no longer contain important details such as the medicine name, batch number, manufacturing date, expiry date, MRP, and usage instructions.
 
-A few resources to get you started if this is your first Flutter project:
+**MediTag solves this problem by capturing, verifying, storing, and transferring medicine information into a new self-contained QR code that can be attached to the dispensed medicine strip.**
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🚀 Live Demo
+
+👉 **https://meditag-hackathon.web.app**
+
+## 💻 GitHub Repository
+
+👉 **https://github.com/tanayadoke2623/meditag**
+
+---
+
+# 🎯 Problem Statement
+
+In pharmacies, customers often purchase medicines in quantities smaller than the original package.
+
+For example:
+
+> A customer needs only 5 tablets from a strip containing 10 tablets.
+
+After cutting the strip, important information printed on the original packaging may be lost, including:
+
+- Medicine name
+- Generic name
+- Strength
+- Dosage form
+- Manufacturer
+- Batch number
+- Manufacturing date
+- Expiry date
+- MRP
+
+This creates problems for:
+
+- Pharmacists
+- Customers
+- Medicine traceability
+- Safe medicine identification
+- Record keeping
+
+---
+
+# 💡 Our Solution
+
+MediTag provides a digital workflow for pharmacies to preserve important medicine information even after a strip is cut.
+
+### MediTag Workflow
+
+```text
+Original Medicine Package
+          ↓
+Scan QR / Barcode / OCR
+          ↓
+Extract Medicine Information
+          ↓
+Pharmacist Verification
+          ↓
+Store in Inventory
+          ↓
+Customer Requests Quantity
+          ↓
+Add Pharmacy Dispensing Instructions
+          ↓
+Generate MediTag QR
+          ↓
+Print QR Label
+          ↓
+Attach QR to Cut Medicine Strip
+          ↓
+Customer Scans QR
+          ↓
+Medicine Information Displayed
