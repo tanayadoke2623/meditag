@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+
+  <meta
+    name="description"
+    content="MediTag - Smart medicine verification and QR labeling"
+  >
+
+  <meta
+    name="mobile-web-app-capable"
+    content="yes"
+  >
+
+  <meta
+    name="apple-mobile-web-app-status-bar-style"
+    content="black"
+  >
+
+  <meta
+    name="apple-mobile-web-app-title"
+    content="MediTag"
+  >
+
+  <link
+    rel="apple-touch-icon"
+    href="icons/Icon-192.png"
+  >
+
+  <link
+    rel="icon"
+    type="image/png"
+    href="favicon.png"
+  >
+
+  <title>MediTag</title>
+
+  <link
+    rel="manifest"
+    href="manifest.json"
+  >
+
+  <!-- ========================================================= -->
+  <!-- FAST OCR ENGINE                                           -->
+  <!-- Tesseract.js v6                                           -->
+  <!-- ========================================================= -->
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@6/dist/tesseract.min.js"></script>
+
+  <script>
+
+    window.mediTagOCRFast = async function (imageData) {
+
+      if (!window.Tesseract) {
+        throw new Error("Tesseract.js OCR engine is not loaded.");
+      }
+
+      console.log("MediTag OCR: starting fast OCR...");
+
+      // ---------------------------------------------------------
+      // Load image
+      // ---------------------------------------------------------
+
+      const image = new Image();
+
+      image.src = imageData;
+
+      await new Promise((resolve, reject) => {
+
+        image.onload = resolve;
+
+        image.onerror = () => {
+          reject(
+            new Error("Could not load medicine image.")
+          );
+        };
+
+      });
+
+      // ---------------------------------------------------------
+      // Resize image
+      //
+      // Medicine packaging contains very small text.
+      // We enlarge it before OCR.
+      // ---------------------------------------------------------
+
+      const maxWidth = 2400;
+
+      let width = image.naturalWidth;
+      let height = image.naturalHeight;
+
+      if (width > maxWidth) {
+
+        const ratio = maxWidth / width;
+
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+
+      }
+
+      const scale = 1.6;
+
+      width = Math.round(width * scale);
+      height = Math.round(height * scale);
+
+      const canvas = document.createElement("canvas");
+
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext(
+        "2d",
+        {
+          willReadFrequently: true
+        }
+      );
+
+      if (!ctx) {
+        throw new Error("Canvas is not available.");
+      }
+
+      // ---------------------------------------------------------
+      // Draw image
+      // ---------------------------------------------------------
+
+      ctx.drawImage(
+        image,
+        0,
+        0,
+        width,
+        height
+      );
+
+      // ---------------------------------------------------------
+      // Image enhancement
+      //
+      // 1. grayscale
+      // 2. contrast
+      // 3. light sharpening
+      // ---------------------------------------------------------
+
+      const pixels = ctx.getImageData(
+        0,
+        0,
+        width,
+        height
+      );
+
+      const data = pixels.data;
+
+      for (
+        let i = 0;
+        i < data.length;
+        i += 4
+      ) {
+
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+
+        let gray =
+          0.299 * r +
+          0.587 * g +
+          0.114 * b;
+
+        // Contrast
+        gray =
+          ((gray - 128) * 1.35) + 128;
+
+        gray =
+          Math.max(
+            0,
+            Math.min(
+              255,
+              gray
+            )
+          );
+
+        data[i] = gray;
+        data[i + 1] = gray;
+        data[i + 2] = gray;
+
+      }
+
+      ctx.putImageData(
+        pixels,
+        0,
+        0
+      );
+
+      const processedImage =
+        canvas.toDataURL(
+          "image/jpeg",
+          0.92
+        );
+
+      // ---------------------------------------------------------
+      // OCR
+      //
+      // PSM 11 = sparse text.
+      //
+      // This is useful for medicine packages because information
+      // such as:
+      //
+      // B.No
+      // MFG
+      // EXP
+      // MRP
+      //
+      // can appear in different areas.
+      // ---------------------------------------------------------
+
+      const result =
+        await Tesseract.recognize(
+          processedImage,
+          "eng",
+          {
+            logger: function (message) {
+
+              if (
+                message.status ===
+                "recognizing text"
+              ) {
+
+                const progress =
+                  Math.round(
+                    (message.progress || 0) * 100
+                  );
+
+                console.log(
+                  "MediTag OCR:",
+                  progress + "%"
+                );
+
+              }
+
+            },
+
+            tessedit_pageseg_mode: "11",
+
+            preserve_interword_spaces: "1"
+          }
+        );
+
+      const text =
+        result &&
+        result.data &&
+        result.data.text
+          ? result.data.text
+          : "";
+
+      console.log(
+        "MediTag OCR completed."
+      );
+
+      console.log(
+        "MediTag OCR text:",
+        text
+      );
+
+      return text;
+    };
+
+  </script>
+
+</head>
+
+<body>
+
+  <script
+    src="flutter_bootstrap.js"
+    async
+  ></script>
+
+</body>
+</html>
